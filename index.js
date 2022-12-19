@@ -1,9 +1,9 @@
-const { response } = require('express')
 const express = require('express')
+const morgan = require('morgan')
+
 const app = express()
 
 app.use(express.json())
-
 const PORT = 3001
 
 const persons = 
@@ -33,6 +33,16 @@ const persons =
 const generateId = () => {
   return Math.floor(Math.random() * 99999999)
 }
+
+// Custom morgan token for post requests
+// Logs the request body only when a POST request is made
+morgan.token('body', req => {
+  if (req.method == 'POST') {
+    return JSON.stringify(req.body)
+  }
+})
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 app.get('/api/persons', (request, response) => {
   response.json(persons)
