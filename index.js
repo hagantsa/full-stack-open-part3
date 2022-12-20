@@ -1,10 +1,16 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 
 const app = express()
 
 app.use(express.json())
-const PORT = 3001
+app.use(cors())
+
+// serve the frontend
+app.use(express.static('build'))
+
+const PORT = process.env.PORT || 8080
 
 const persons = 
 [
@@ -79,9 +85,9 @@ app.delete('/api/persons/:id', (request, response) => {
   if (personToDelete !== -1) {
     persons.splice(personToDelete, 1)
   }
-
+  console.log(`person with id ${id} deleted`)
   // return 204 regardless
-  return response.status(204)
+  return response.status(204).end()
 })
 
 app.post('/api/persons', (request, response) => {
