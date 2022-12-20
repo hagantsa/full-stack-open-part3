@@ -85,7 +85,7 @@ app.delete('/api/persons/:id', (request, response) => {
   if (personToDelete !== -1) {
     persons.splice(personToDelete, 1)
   }
-  console.log(`person with id ${id} deleted`)
+
   // return 204 regardless
   return response.status(204).end()
 })
@@ -94,7 +94,6 @@ app.post('/api/persons', (request, response) => {
   const id = generateId()
   
   const { name, number } = request.body
-  console.log(name, number)
 
   // check if the name or number is missing
   if (!name || !number) {

@@ -6,3 +6,5 @@ This repo contains just the production build of the frontend. In this repo there
 
 The url to the app deployed to fly.io is here:
 https://still-wildflower-5080.fly.dev/
+
+The deploy script is kinda scuffed, as it has hardcoded paths for this repo and the repo where the frontend resides.
