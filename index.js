@@ -1,6 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 
 const app = express()
 
@@ -10,31 +12,6 @@ app.use(cors())
 // serve the frontend
 app.use(express.static('build'))
 
-const PORT = process.env.PORT || 8080
-
-const persons = 
-[
-  { 
-    "id": 1,
-    "name": "Arto Hellas", 
-    "number": "040-123456"
-  },
-  { 
-    "id": 2,
-    "name": "Ada Lovelace", 
-    "number": "39-44-5323523"
-  },
-  { 
-    "id": 3,
-    "name": "Dan Abramov", 
-    "number": "12-43-234345"
-  },
-  { 
-    "id": 4,
-    "name": "Mary Poppendieck", 
-    "number": "39-23-6423122"
-  }
-]
 
 const generateId = () => {
   return Math.floor(Math.random() * 99999999)
@@ -51,70 +28,72 @@ morgan.token('body', req => {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  Person.find({}).then(persons => {
+    response.json(persons)
+  })
 })
 
 app.get('/info', (request, response) => {
-  response.send(`
+  Person.find({}).then(persons => {
+    response.send(`
     <p>Phonebook has info for ${persons.length} people</p>
     <p>${Date()}</p>`
-  )
+    )
+  })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
+  const id = request.params.id
   
-  // look for the person with given id
-  const filtered = persons.filter(person => person.id === id)[0]
-
-  // send status code 400 if no person is found
-  if (!filtered) {
-    return response.status(404).json({
-      content: 'person not found'
+  Person.findById(id).then(person => {
+    response.json(person)
+  })
+  .catch(err => {
+    response.status(404).json({
+      error: `could not find person with id ${id}`
     })
-  }
-  
-  response.json(filtered)
+  })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id)
-
+  
   // check if the person exists and delete the resource if so  
   const personToDelete = persons.findIndex(person => person.id === id)
   if (personToDelete !== -1) {
     persons.splice(personToDelete, 1)
   }
-
+  
   // return 204 regardless
   return response.status(204).end()
 })
 
-app.post('/api/persons', (request, response) => {
-  const id = generateId()
-  
+app.post('/api/persons', (request, response) => {  
   const { name, number } = request.body
-
+  
   // check if the name or number is missing
   if (!name || !number) {
     return response.status(400).json({
       error: 'name or number is missing'
     })
   }
+  
+  // create the new person mongoose object
+  const newPerson = new Person({ name, number })
 
-  // check if the name already exists
-  if (persons.find(person => person.name === name)) {
-    return response.status(400).json({
-      error: 'name must be unique'
+  // save the new person to the db
+  newPerson.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
+  .catch(err => {
+    console.log('error')
+    response.status(400).json({
+      error: 'error adding person'
     })
-  }
-
-  // create the new person object and add it to the data structure
-  const newPerson = { id, name, number }
-  persons.push(newPerson)
-  response.json(newPerson)
+  })
 })
 
+const PORT = process.env.PORT || 8080
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`)
 })
