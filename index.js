@@ -46,12 +46,15 @@ app.get('/api/persons/:id', (request, response) => {
   const id = request.params.id
   
   Person.findById(id).then(person => {
-    response.json(person)
+    if (person) {
+      response.json(person)
+    } else {
+      response.status(404).end()
+    }
   })
   .catch(err => {
-    response.status(404).json({
-      error: `could not find person with id ${id}`
-    })
+    console.log(err)
+    response.status(500).end()
   })
 })
 
@@ -86,10 +89,8 @@ app.post('/api/persons', (request, response) => {
     response.json(savedPerson)
   })
   .catch(err => {
-    console.log('error')
-    response.status(400).json({
-      error: 'error adding person'
-    })
+    console.log('error', err)
+    response.status(500).end()
   })
 })
 
