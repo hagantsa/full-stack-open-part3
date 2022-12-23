@@ -32,8 +32,8 @@ app.get('/api/persons', (request, response) => {
 app.get('/info', (request, response) => {
   Person.find({}).then(persons => {
     response.send(`
-    <p>Phonebook has info for ${persons.length} people</p>
-    <p>${Date()}</p>`
+      <p>Phonebook has info for ${persons.length} people</p>
+      <p>${Date()}</p>`
     )
   })
 })
@@ -101,7 +101,7 @@ app.put('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndUpdate(
     id, 
     { number: modifiedNumber },
-    { new: true } // No runValidator here because the name isn't changed
+    { new: true, runValidators: true, context: 'query' }
   )
     .then(updatedPerson => {
       response.json(updatedPerson)
