@@ -13,10 +13,6 @@ app.use(cors())
 // serve the frontend
 app.use(express.static('build'))
 
-const generateId = () => {
-  return Math.floor(Math.random() * 99999999)
-}
-
 // Custom morgan token for post requests
 // Logs the request body only when a POST request is made
 morgan.token('body', req => {
