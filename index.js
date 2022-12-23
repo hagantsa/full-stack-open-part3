@@ -71,16 +71,23 @@ app.post('/api/persons', (request, response, next) => {
     })
   }
   
-  // create the new person mongoose object
-  const newPerson = new Person({ name, number })
+  // Check if person already exists in db
+  Person.exists({ name: name }).then(person => {
+    // return 400 if person exists
+    if (person) {
+      return response.status(400).send({ error: 'Person already exists' })
+    }
 
-  // save the new person to the db
-  newPerson.save().then(savedPerson => {
-    response.json(savedPerson)
-  })
-  .catch(error => {
-    console.log('error', error)
-    next(error)
+    // create the new person mongoose object
+    const newPerson = new Person({ name, number })
+  
+    // save the new person to the db
+    newPerson.save().then(savedPerson => {
+      response.json(savedPerson)
+    })
+    .catch(error => {
+      next(error)
+    })
   })
 })
 
@@ -115,8 +122,8 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: 'malformatted id' })
   }
 
-  // return 400 if the name is too short
-  if (error.name == 'ValidationError') {
+  // return 400 if the name/number is not formatted correctly
+  if (error.name === 'ValidationError') {
     return response.status(400).send({ error: error.message })
   }
 
