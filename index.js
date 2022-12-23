@@ -13,7 +13,6 @@ app.use(cors())
 // serve the frontend
 app.use(express.static('build'))
 
-
 const generateId = () => {
   return Math.floor(Math.random() * 99999999)
 }
@@ -25,8 +24,6 @@ morgan.token('body', req => {
     return JSON.stringify(req.body)
   }
 })
-
-
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
@@ -95,12 +92,14 @@ app.put('/api/persons/:id', (request, response, next) => {
   const body = request.body
   const id = request.params.id
   
-  const modifiedPerson = {
-    name: body.name,
-    number: body.number,
-  }
+  // modify only the person's number when it's updated
+  const modifiedNumber = body.number
 
-  Person.findByIdAndUpdate(id, modifiedPerson, { new: true })
+  Person.findByIdAndUpdate(
+    id, 
+    { number: modifiedNumber },
+    { new: true } // No runValidator here because the name isn't changed
+  )
     .then(updatedPerson => {
       response.json(updatedPerson)
     })
