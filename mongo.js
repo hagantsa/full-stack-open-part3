@@ -25,7 +25,7 @@ const addPerson = (name, number) => {
   })
 
   person.save()
-    .then(result => {
+    .then(() => {
       console.log(`added ${name} number ${number} to phonebook`)
       mongoose.connection.close()
     })
@@ -42,21 +42,21 @@ const password = process.argv[2]
 const url = `mongodb+srv://fullstack_pro:${password}@phonebook-thingy.q5kmktj.mongodb.net/phoneBookApp?retryWrites=true&w=majority`
 
 
-if (process.argv.length == 3) {
+if (process.argv.length === 3) {
   mongoose.connect(url)
   getAllEntries()
 } else {
 
-  if (process.argv.length == 4) {
+  if (process.argv.length === 4) {
     console.log('Please provide both a person name and number: node mongo.js <password> <name> <number>')
     process.exit(1)
   }
-  
+
   if (process.argv.length > 5) {
     console.log('Please enclose names or numbers with whitespaces in quotes')
     process.exit(1)
   }
-  
+
   const name = process.argv[3]
   const number = process.argv[4]
   mongoose.connect(url)

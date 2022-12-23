@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/hagantsa/full-stack-open-part3#readme",
   "devDependencies": {
+    "eslint": "^8.30.0",
     "nodemon": "^2.0.20"
   },
   "dependencies": {

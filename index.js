@@ -3,7 +3,6 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
-const { response } = require('express')
 
 const app = express()
 
@@ -16,7 +15,7 @@ app.use(express.static('build'))
 // Custom morgan token for post requests
 // Logs the request body only when a POST request is made
 morgan.token('body', req => {
-  if (req.method == 'POST') {
+  if (req.method === 'POST') {
     return JSON.stringify(req.body)
   }
 })
@@ -40,37 +39,38 @@ app.get('/info', (request, response) => {
 
 app.get('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
-  
-  Person.findById(id).then(person => {
-    if (person) {
-      response.json(person)
-    } else {
-      response.status(404).end()
-    }
-  })
-  .catch(error => next(error))
+
+  Person.findById(id)
+    .then(person => {
+      if (person) {
+        response.json(person)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
 
   Person.findByIdAndRemove(id)
-    .then(result => {
+    .then(() => {
       response.status(204).end()
     })
     .catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response, next) => {  
+app.post('/api/persons', (request, response, next) => {
   const { name, number } = request.body
-  
+
   // check if the name or number is missing
   if (!name || !number) {
     return response.status(400).json({
       error: 'name or number is missing'
     })
   }
-  
+
   // Check if person already exists in db
   Person.exists({ name: name }).then(person => {
     // return 400 if person exists
@@ -80,26 +80,27 @@ app.post('/api/persons', (request, response, next) => {
 
     // create the new person mongoose object
     const newPerson = new Person({ name, number })
-  
+
     // save the new person to the db
-    newPerson.save().then(savedPerson => {
-      response.json(savedPerson)
-    })
-    .catch(error => {
-      next(error)
-    })
+    newPerson.save()
+      .then(savedPerson => {
+        response.json(savedPerson)
+      })
+      .catch(error => {
+        next(error)
+      })
   })
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
   const body = request.body
   const id = request.params.id
-  
+
   // modify only the person's number when it's updated
   const modifiedNumber = body.number
 
   Person.findByIdAndUpdate(
-    id, 
+    id,
     { number: modifiedNumber },
     { new: true, runValidators: true, context: 'query' }
   )
