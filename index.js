@@ -68,7 +68,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {  
+app.post('/api/persons', (request, response, next) => {  
   const { name, number } = request.body
   
   // check if the name or number is missing
@@ -87,7 +87,7 @@ app.post('/api/persons', (request, response) => {
   })
   .catch(error => {
     console.log('error', error)
-    response.status(500).end()
+    next(error)
   })
 })
 
@@ -118,6 +118,11 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
+  }
+
+  // return 400 if the name is too short
+  if (error.name == 'ValidationError') {
+    return response.status(400).send({ error: error.message })
   }
 
   next(error)
